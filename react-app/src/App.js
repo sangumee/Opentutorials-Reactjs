@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import Navigation from './components/navigation';
-import Content from './components/content';
+import ReadContent from './components/readContent';
 import Subject from './components/subject';
+import Control from './components/control';
+import CreateContent from './components/createContent';
 
 class App extends Component {
   constructor(props){
     super(props);
+    this.max_content_id=4;
     this.state = {
-      mode:'read',
+      mode:'create',
       selected_content_id:2,
       subject:{title:'WEB', sub:'World Wide Web!!'},
       welcome:{title:'Welcome', desc:'Hello Home Page!!'},
@@ -20,12 +23,12 @@ class App extends Component {
     }
   }
   render(){
-    console.log('App Render');
-    var _title, _desc = null;
+    var _title, _desc, _article = null;
     if(this.state.mode ==='welcome'){
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
-    }else if(this.state.mode==='read'){
+      _article = <ReadContent title={_title} desc={_desc}/>
+    } else if (this.state.mode==='read'){
       var i = 0;
       while(i<this.state.contents.length){
         var data= this.state.contents[i];
@@ -36,6 +39,26 @@ class App extends Component {
         }
         i+=1;
       }
+      _article = <ReadContent title={_title} desc={_desc}/>
+    } else if (this.state.mode ==='create'){
+      _article = <CreateContent onSubmit={function(_title, _desc){
+        // Add content to this.state.contents
+        this.max_content_id = this.max_content_id+1;
+
+        // var _contents = this.state.contents.concat(
+        //   {id:this.max_content_id, title:_title, desc:_desc}
+        // )
+        var newContents = Array.from(this.state.contents);
+        newContents.push({
+          id:this.max_content_id,
+          title:_title,
+          desc:_desc
+        });
+        
+        this.setState({
+          contents : newContents
+        });
+      }.bind(this)}/>
     }
     console.log('render', this);
     return (
@@ -53,9 +76,13 @@ class App extends Component {
         })
         }.bind(this)} 
         data={this.state.contents}
-    
         />
-        <Content title={_title} desc={_desc}/>
+        <Control onChangeMode={function(_mode){
+          this.setState({
+            mode:_mode
+          })
+        }.bind(this)}/>
+        {_article}
       </div>
     );
   }
